@@ -1,37 +1,48 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Login } from './Login.js'
-import { SignUp } from "./SignUp";
+import { Login } from './pages/Login.js'
+import { SignUp } from "./pages/SignUp.js";
 import '@mantine/core/styles.css';
 import { useLocation } from 'react-router-dom';
-import Navbar from './Navbar.js'
-import Memories from './Memories.js'
-import { MantineProvider } from '@mantine/core';
-import { BrowserRouter } from 'react-router-dom';
+import Navbar from './components/Navbar.js'
+import Memories from './pages/Memories.js'
+import { PrivateRoute } from './routeGuards/PrivateRoute.js';
+import { PublicRoute } from './routeGuards/PublicRoute.js';
+import { useAuth } from './contexts/AuthProvider.js';
+import Landing from './pages/Landing.js';
 
 function App() {
 
   const location = useLocation();
    // Define routes where the Navbar should be hidden
   const hideNavbarRoutes = ['login','signup']; // Add any others here
+  const { user } = useAuth();
 
   const shouldHideNavbar = hideNavbarRoutes.some(route => 
     {
       const path = location.pathname.toLowerCase();
       console.log("cur=",location.pathname);
-      return path.includes(route);
+      return path.includes(route) ||  (location.pathname === "/");
     });
 
 
   return (
         <>
-        {!shouldHideNavbar ? <Navbar/> : <></>}
+        {shouldHideNavbar ?  <></> : <Navbar/>}
         <Routes>
-            <Route path="/" element={<></>} />
-            <Route path="/memories" element={<Memories/>} />
-            <Route path="/login" element={<Login/>}/>
-            <Route path="/signup" element={<SignUp/>}/>
+
+            <Route path="/" element={<Landing/>}/>
+
+            [/*only pages users can see when not logged in*/]
+            <Route path="/login" element={<PublicRoute><Login/></PublicRoute>}/>
+            <Route path="/signup" element={<PublicRoute><SignUp/></PublicRoute>}/>
+
+            {/* Protected Routes */}
+            <Route path="/home" element={<PrivateRoute><>hi</></PrivateRoute>} />
+            <Route path="/memories" element={<PrivateRoute><Memories/></PrivateRoute>} />
+            <Route path="/login" element={<PrivateRoute><Login/></PrivateRoute>}/>
+            <Route path="/signup" element={<PrivateRoute><SignUp/></PrivateRoute>}/>
         </Routes>
         </>
   );

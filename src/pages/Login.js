@@ -12,7 +12,7 @@ import {
   Title,
   Divider,
 } from "@mantine/core";
-import { auth, signInWithEmailAndPassword } from "./firebase";
+import { auth, signInWithEmailAndPassword } from "../firebase";
 import { useMantineTheme } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -32,8 +32,8 @@ export function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      alert("Logged in successfully!");
       // Redirect or update UI as needed
+      navigate('/home');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -45,8 +45,8 @@ export function Login() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      alert("Signed in with Google!");
       // Redirect or update UI as needed
+      navigate('/home');
     } catch (error) {
       console.error(error.message);
     }

@@ -12,7 +12,7 @@ import {
   Divider,
 } from "@mantine/core";
 import { createUserWithEmailAndPassword } from "firebase/auth"; // Import Firebase sign-up function
-import { auth } from "./firebase"; // Import Firebase auth instance
+import { auth } from "../firebase"; // Import Firebase auth instance
 import { useMantineTheme } from '@mantine/core'; //import maintine theme
 import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
@@ -31,6 +31,7 @@ export function SignUp() {
       await createUserWithEmailAndPassword(auth, email, password); // Firebase sign-up
       alert("Account created successfully!"); // On successful sign-up
       // Redirect to login or another page (you can use React Router here)
+      navigate('/home');
     } catch (err) {
       setError(err.message); // Display error if sign-up fails
     } finally {
@@ -42,7 +43,7 @@ export function SignUp() {
   const provider = new GoogleAuthProvider();
   try {
     await signInWithPopup(auth, provider);
-    alert('Signed in with Google!');
+    navigate('/home');
   } catch (error) {
     console.error(error.message);
   }
