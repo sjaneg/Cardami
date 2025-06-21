@@ -53,15 +53,17 @@ export function SignUp() {
   const navigate = useNavigate();
 
   return (
+    <>
+    <h1 className="absolute top-2 left-4">Cardami</h1>
     <div className="flex flex-col justify-center h-screen w-screen">
       <Container style={{ maxWidth: 400, width: '100%'}}>
-        <Title align="center">Register</Title>
+        <Title align="center">Sign up</Title>
 
         <Paper p={22} mt="md" radius="md" style={{ backgroundColor: theme.colors.dark[6]}}>
           <form onSubmit={handleSignUp}>
             <TextInput
               label="Email"
-              placeholder="youremail@gmail.com"
+              placeholder="you@example.com"
               required
               radius="md"
               value={email}
@@ -75,7 +77,7 @@ export function SignUp() {
             />
             <PasswordInput
               label="Password"
-              placeholder="Your password"
+              placeholder="your password"
               required
               mt="xs"
               radius="md"
@@ -105,22 +107,6 @@ export function SignUp() {
 
             {error && <Text c="red" size="sm">{error}</Text>} {/* Display error if any */}
 
-            <Group position="center" spacing="xs" mt="md" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-              <Text size="xs" style={{ flexShrink: 0, color:theme.colors.dark[0]}}>
-                Already have an account?
-              </Text>
-              <Text
-                size="xs"
-                onClick={() => navigate('/login')}
-                style={{
-                  color: '#228be6', // Mantine's default blue[6], or customize it
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                }}
-              >
-                Login
-              </Text>
-            </Group>
             </form>
 
             {/* Divider with OR */}
@@ -154,10 +140,27 @@ export function SignUp() {
               Sign up with Google
             </Button>
 
-            
+            <Group position="center" spacing="xs" mt="md" style={{width: '100%' }}>
+              <Text size="xs" style={{ flexShrink: 0, color:theme.colors.dark[0]}}>
+                Already have an account?
+              </Text>
+              <Text
+                size="xs"
+                onClick={() => navigate('/login')}
+                style={{
+                  color: '#228be6', // Mantine's default blue[6], or customize it
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                Login
+              </Text>
+            </Group>
+
         </Paper>
       </Container>
     </div>
+    </>
     
   );
 }
