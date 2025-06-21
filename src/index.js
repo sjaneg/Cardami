@@ -4,15 +4,17 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { MantineProvider } from '@mantine/core';
+import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-
-  <MantineProvider>
-    <div className="bg-black min-h-screen text-white">
-      <App />
-    </div>
-  </MantineProvider>
+  <BrowserRouter>
+    <MantineProvider>
+      <div className="bg-black min-h-screen text-white">
+        <App />
+      </div>
+    </MantineProvider>
+  </BrowserRouter>
 
 );
 
