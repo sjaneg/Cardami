@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { useSprings, animated, to as interpolate } from '@react-spring/web'
+import { useSprings, animated, to as interpolate } from 'react-spring'
 import { useDrag } from 'react-use-gesture'
+import { useLocation } from 'react-router-dom'
 
 const cards = [
   'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
@@ -8,8 +9,8 @@ const cards = [
   'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
 ]
 
-// Imagen del reverso de la carta
-const cardBackColor = '#1a1a1a'
+// Color del reverso de la carta
+const cardBackColor = '#ffffff'
 
 // Estados de la animación
 const ANIMATION_STATES = {
@@ -19,39 +20,40 @@ const ANIMATION_STATES = {
   INTERACTIVE: 'interactive'
 }
 
-// Posiciones iniciales (fuera de la pantalla a la izquierda)
+// Posiciones iniciales (REALMENTE ocultas, fuera de la pantalla)
 const from = (i) => ({ 
-  x: -400, 
-  y: i * -4, 
-  scale: 0.8, 
+  x: -600, // MÁS lejos a la izquierda
+  y: i * -2, 
+  scale: 0.9, 
   rot: 0,
   rotateY: 0
 })
 
-// Posiciones durante el deslizamiento
+// Posiciones durante el deslizamiento (mazo compacto en el centro)
 const sliding = (i) => ({
-  x: i * 20 - 20, // Las cartas se agrupan en el centro
-  y: i * -4,
-  scale: 0.8,
-  rot: -5 + i * 5,
+  x: 0, // Todas las cartas en el mismo lugar (mazo)
+  y: i * -2, // Solo un poquito de separación vertical
+  scale: 0.9,
+  rot: 0, // Sin rotación, todas iguales
   rotateY: 0,
-  delay: i * 100
+  delay: 0 // Todas se mueven juntas
 })
 
-// Posiciones expandidas (mostrando el reverso)
+// Posiciones expandidas (abanico)
 const expanded = (i) => ({
-  x: i * 120 - 120, // Se separan horizontalmente
+  x: (i - 1) * 140, // Se separan horizontalmente desde el centro
   y: i * -4,
   scale: 1,
-  rot: -5 + i * 5,
-  rotateY: 0, // Reverso visible
-  delay: i * 150
+  rot: (i - 1) * 15, // Rotación para efecto abanico
+  rotateY: 0,
+  delay: i * 100 // Se abren una por una
 })
 
 const trans = (r, s, rotY) =>
   `perspective(1500px) rotateX(30deg) rotateY(${rotY}deg) rotateZ(${r}deg) scale(${s})`
 
 function Deck() {
+  const location = useLocation()
   const [animationState, setAnimationState] = useState(ANIMATION_STATES.HIDDEN)
   const [flippedCards, setFlippedCards] = useState(new Set())
   const [gone] = useState(() => new Set())
@@ -60,30 +62,56 @@ function Deck() {
     ...from(i),
   }))
 
-  // Iniciar la secuencia de animación al montar el componente
-  useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setAnimationState(ANIMATION_STATES.SLIDING)
-      api.start(i => sliding(i))
-    }, 500)
+  // Función para iniciar la animación
+  const startAnimation = () => {
+    // Paso 1: Deslizar como mazo hasta el centro
+    setAnimationState(ANIMATION_STATES.SLIDING)
+    api.start(i => sliding(i))
 
-    const timer2 = setTimeout(() => {
+    // Paso 2: Expandir como abanico
+    const timer1 = setTimeout(() => {
       setAnimationState(ANIMATION_STATES.EXPANDED)
       api.start(i => expanded(i))
-    }, 1500)
+    }, 1200) // Más tiempo para ver el mazo
 
-    const timer3 = setTimeout(() => {
+    // Paso 3: Permitir interacción
+    const timer2 = setTimeout(() => {
       setAnimationState(ANIMATION_STATES.INTERACTIVE)
-    }, 2500)
+    }, 2000)
 
     return () => {
       clearTimeout(timer1)
       clearTimeout(timer2)
-      clearTimeout(timer3)
     }
-  }, [api])
+  }
 
-  // Manejar el click para voltear cartas
+  // Detectar cuando navegamos a HOME y SIEMPRE activar animación
+  useEffect(() => {
+    if (location.pathname === '/') {
+      // Reiniciar todo primero
+      setAnimationState(ANIMATION_STATES.HIDDEN)
+      setFlippedCards(new Set())
+      api.start(i => from(i)) // Resetear a posición inicial
+
+      // Luego iniciar la animación
+      const timer = setTimeout(() => {
+        startAnimation()
+      }, 100) // Pequeño delay para que se vea el reset
+
+      return () => clearTimeout(timer)
+    }
+  }, [location.pathname, api])
+
+  // Ocultar cartas cuando salimos de home
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      setAnimationState(ANIMATION_STATES.HIDDEN)
+      setFlippedCards(new Set())
+      api.start(i => from(i))
+    }
+  }, [location.pathname, api])
+
+  // Manejar SOLO el volteo de cartas (sin moverlas)
   const handleCardClick = (index) => {
     if (animationState !== ANIMATION_STATES.INTERACTIVE) return
     
@@ -97,48 +125,21 @@ function Deck() {
       return newSet
     })
 
-    // Animar el volteo
+    // SOLO animar el volteo, mantener posición
     api.start(i => {
       if (i !== index) return
       const isFlipped = !flippedCards.has(index)
       return {
         rotateY: isFlipped ? 180 : 0,
+        // NO cambiar x, y, rot, scale - mantener posición del abanico
         config: { tension: 300, friction: 30 }
       }
     })
   }
 
-  // Gesture para arrastrar (funcionalidad original)
-  const bind = useDrag(({ args: [index], down, movement: [mx], direction: [xDir], velocity }) => {
-    if (animationState !== ANIMATION_STATES.INTERACTIVE) return
-    
-    const trigger = velocity > 0.2
-    const dir = xDir < 0 ? -1 : 1
-    if (!down && trigger) gone.add(index)
-    
-    api.start(i => {
-      if (index !== i) return
-      const isGone = gone.has(index)
-      const x = isGone ? (200 + window.innerWidth) * dir : down ? mx + (i * 120 - 120) : (i * 120 - 120)
-      const rot = mx / 100 + (isGone ? dir * 10 * velocity : 0) + (-5 + i * 5)
-      const scale = down ? 1.1 : 1
-      return {
-        x,
-        rot,
-        scale,
-        delay: undefined,
-        config: { friction: 50, tension: down ? 800 : isGone ? 200 : 500 },
-      }
-    })
-
-    if (!down && gone.size === cards.length) {
-      setTimeout(() => {
-        gone.clear()
-        setFlippedCards(new Set())
-        api.start(i => expanded(i))
-      }, 600)
-    }
-  })
+  // Eliminar completamente la funcionalidad de arrastrar
+  // Las cartas solo se voltean, no se mueven
+  const bind = () => ({}) // Gesture vacío
 
   return (
     <div style={{ 
@@ -148,7 +149,7 @@ function Deck() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#000000',
       overflow: 'hidden'
     }}>
       {props.map(({ x, y, rot, scale, rotateY }, i) => (
@@ -162,7 +163,6 @@ function Deck() {
           }}
         >
           <animated.div
-            {...(animationState === ANIMATION_STATES.INTERACTIVE ? bind(i) : {})}
             onClick={() => handleCardClick(i)}
             style={{
               width: '140px',
@@ -183,12 +183,18 @@ function Deck() {
                 height: '100%',
                 backfaceVisibility: 'hidden',
                 borderRadius: '10px',
-                backgroundImage: `url(${cardBack})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                border: '2px solid #f59e0b'
+                backgroundColor: cardBackColor,
+                border: '2px solid #333333',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#000000',
+                fontSize: '24px',
+                fontWeight: 'bold'
               }}
-            />
+            >
+              ♠
+            </div>
             
             {/* Cara trasera (imagen de la carta) */}
             <div
@@ -202,32 +208,22 @@ function Deck() {
                 backgroundImage: `url(${cards[i]})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                border: '2px solid #f59e0b'
+                border: '2px solid #333333'
               }}
             />
           </animated.div>
         </animated.div>
       ))}
       
-      {/* Indicador de estado */}
-      <div style={{
-        position: 'absolute',
-        top: '20px',
-        left: '20px',
-        color: 'white',
-        fontSize: '18px',
-        fontWeight: 'bold',
-        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-      }}>
-        {animationState === ANIMATION_STATES.HIDDEN && 'Preparando cartas...'}
-        {animationState === ANIMATION_STATES.SLIDING && 'Deslizando cartas...'}
-        {animationState === ANIMATION_STATES.EXPANDED && 'Expandiendo cartas...'}
-        {animationState === ANIMATION_STATES.INTERACTIVE && 'Haz click para voltear las cartas'}
-      </div>
+      {/* Sin indicadores molestos */}
     </div>
   )
 }
 
-export default function App() {
-  return <Deck />
+export default function Cards() {
+  return (
+    <div>
+      <Deck />
+    </div>
+  )
 }

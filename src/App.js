@@ -7,6 +7,7 @@ import '@mantine/core/styles.css';
 import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar.js'
 import Memories from './Memories.js'
+import Cards from './Cards'
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -28,7 +29,7 @@ function App() {
         <>
         {!shouldHideNavbar ? <Navbar/> : <></>}
         <Routes>
-            <Route path="/" element={<></>} />
+            <Route path="/" element={<Cards/>} />
             <Route path="/memories" element={<Memories/>} />
             <Route path="/login" element={<Login/>}/>
             <Route path="/signup" element={<SignUp/>}/>
