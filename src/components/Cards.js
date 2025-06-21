@@ -20,10 +20,10 @@ function Card({ index, image }) {
     config: { tension: 200, friction: 25 }
   })
 
-  // Animación de expansión como abanico
+  // Animación de expansión como abanico - TODAS giran!
   const expand = useSpring({
     transform: isExpanded 
-      ? `translateX(${(index - 1) * 120}px) rotate(${(index - 1) * 15 + (Math.random() * 6 - 3)}deg)` 
+      ? `translateX(${(index - 1) * 120}px) rotate(${index * 15 - 15 + 5}deg)` 
       : 'translateX(0px) rotate(0deg)',
     config: { tension: 250, friction: 30 }
   })
@@ -67,7 +67,7 @@ function Card({ index, image }) {
       style={{
         position: 'absolute',
         left: '45%',
-        top: '25%',
+        top: '45%',
         ...slideIn
       }}
     >
