@@ -41,8 +41,6 @@ function App() {
             {/* Protected Routes */}
             <Route path="/home" element={<PrivateRoute><>hi</></PrivateRoute>} />
             <Route path="/memories" element={<PrivateRoute><Memories/></PrivateRoute>} />
-            <Route path="/login" element={<PrivateRoute><Login/></PrivateRoute>}/>
-            <Route path="/signup" element={<PrivateRoute><SignUp/></PrivateRoute>}/>
         </Routes>
         </>
   );
