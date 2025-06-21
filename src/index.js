@@ -8,8 +8,10 @@ import { MantineProvider } from '@mantine/core';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
 
-  <MantineProvider withGlobalStyles withNormalizeCSS>
-    <App />
+  <MantineProvider>
+    <div className="bg-black min-h-screen text-white">
+      <App />
+    </div>
   </MantineProvider>
 
 );

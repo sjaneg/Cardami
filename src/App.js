@@ -1,7 +1,9 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './login';
+import { Login } from './Login'
+import { SignUp } from "./SignUp";
+import '@mantine/core/styles.css';
 
 function AppWrapper() {
   const location = useLocation();
@@ -12,8 +14,8 @@ function AppWrapper() {
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
 
   return (
-    <>
-      {!shouldHideNavbar && <Navbar />}
+    <div className="bg-black min-h-screen text-white">
+    <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         {/* Add other routes here */}
@@ -27,6 +29,7 @@ function App() {
     <Router>
       <AppWrapper />
     </Router>
+    </div>
   );
 }
 
