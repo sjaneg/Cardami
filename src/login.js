@@ -1,45 +1,80 @@
-// src/Login.js
-import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase';
+import React, { useState } from "react";
+import {
+  Anchor,
+  Button,
+  Checkbox,
+  Container,
+  Group,
+  Paper,
+  PasswordInput,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { auth, signInWithEmailAndPassword } from "./firebase";  // Import Firebase auth functions
 
-const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+export function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");  // For displaying errors
+  const [loading, setLoading] = useState(false);  // For showing a loading state during login
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            alert("Logged in!");
-        } catch (err) {
-            setError(err.message);
-        }
-    };
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);  // Start loading
 
-    return (
+    try {
+      await signInWithEmailAndPassword(auth, email, password);  // Firebase login
+      alert("Logged in successfully!");  // On successful login
+      // Redirect or perform any other action after successful login (e.g. navigate to dashboard)
+    } catch (err) {
+      setError(err.message);  // Display error if login fails
+    } finally {
+      setLoading(false);  // Stop loading
+    }
+  };
+
+  return (
+    <Container size={420} my={40}>
+      <Title align="center">Welcome back!</Title>
+
+      <Text>
+        Don't have an account yet? <Anchor>Sign up</Anchor>
+      </Text>
+
+      <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
         <form onSubmit={handleLogin}>
-            <h1 class="text-3xl font-bold underline">
-                Hello world!
-            </h1>
-            <h2 className="text-2xl font-semibold mb-6 text-center text-red-800">Login</h2>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            /><br />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            /><br />
-            <button type="submit">Login</button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-        </form>
-    );
-};
+          <TextInput
+            label="Email"
+            placeholder="you@mantine.dev"
+            required
+            radius="md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Your password"
+            required
+            mt="md"
+            radius="md"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && <Text color="red" size="sm">{error}</Text>}  {/* Display error if any */}
 
-export default Login;
+          <Group justify="space-between" mt="lg">
+            <Checkbox label="Remember me" />
+            <Anchor component="button" size="sm">
+              Forgot password?
+            </Anchor>
+          </Group>
+
+          <Button fullWidth mt="xl" radius="md" type="submit" loading={loading}>
+            Sign in
+          </Button>
+        </form>
+      </Paper>
+    </Container>
+  );
+}
