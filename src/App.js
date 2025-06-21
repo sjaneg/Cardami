@@ -12,9 +12,11 @@ function App() {
 
   const location = useLocation();
    // Define routes where the Navbar should be hidden
-  const hideNavbarRoutes = ["/login"]; // Add any others here
+  const hideNavbarRoutes = ["/login","signup"]; // Add any others here
 
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const shouldHideNavbar = hideNavbarRoutes.some.includes((route)=>{
+    location.pathname.includes(route);
+  });
 
 
   return (
