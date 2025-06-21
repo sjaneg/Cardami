@@ -5,11 +5,13 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter } from 'react-router-dom';
+import { useMantineTheme } from '@mantine/core';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <BrowserRouter>
-    <MantineProvider>
+    <MantineProvider theme={{colorScheme:'dark'}} withGlobalStyles withNormalizeCSS>
       <div className="bg-black min-h-screen text-white">
         <App />
       </div>

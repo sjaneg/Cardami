@@ -9,6 +9,7 @@ import {
     PasswordInput,
     Text,
     TextInput,
+    Title,
 } from "@mantine/core";
 import { auth, signInWithEmailAndPassword } from "./firebase";  // Import Firebase auth functions
 
@@ -34,7 +35,8 @@ export function Login() {
     };
 
     return (
-        <Container size={420} my={40} className="bg-black">
+        <Container size={420}>
+            <Title align="center">Login</Title>
 
             <Paper withBorder shadow="sm" p={22} mt={30} radius="md" >
                 <form onSubmit={handleLogin}>

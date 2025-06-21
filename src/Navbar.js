@@ -7,7 +7,7 @@ export default function NavBar() {
   return (
 
     <nav class="flex items-center justify-between p-6">
-        <div class="w-full flex items-center gap-6 text-sm">
+        <div className="w-full flex items-center gap-6 text-sm">
             <Link to="/" className={`hover:text-gray-400 font-audiowide px-4 py-2 text-xl ${currentPath === "/" ? "underline underline-offset-4" : ""}`}>
               Home
             </Link>

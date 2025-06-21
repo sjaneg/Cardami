@@ -1,8 +1,18 @@
 // src/SignUp.js
 import React, { useState } from "react";
-import { Button, Container, Group, Paper, PasswordInput, Text, TextInput, Title } from "@mantine/core";
+import { 
+  Button, 
+  Container, 
+  Group, 
+  Paper, 
+  PasswordInput, 
+  Text, 
+  TextInput, 
+  Title 
+} from "@mantine/core";
 import { createUserWithEmailAndPassword } from "firebase/auth"; // Import Firebase sign-up function
 import { auth } from "./firebase"; // Import Firebase auth instance
+import { useMantineTheme } from '@mantine/core'; //import maintine theme
 
 export function SignUp() {
   const [email, setEmail] = useState("");
@@ -25,39 +35,56 @@ export function SignUp() {
     }
   };
 
+  const theme = useMantineTheme();
+
   return (
-    <Container size={420} my={40}>
-      <Title align="center">Create an Account</Title>
+    <div className="flex flex-col justify-center h-screen w-screen">
+      <Container size={420}>
+        <Title align="center">Register</Title>
 
-      <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
-        <form onSubmit={handleSignUp}>
-          <TextInput
-            label="Email"
-            placeholder="you@mantine.dev"
-            required
-            radius="md"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <PasswordInput
-            label="Password"
-            placeholder="Your password"
-            required
-            mt="md"
-            radius="md"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {error && <Text color="red" size="sm">{error}</Text>} {/* Display error if any */}
+        <Paper p={22} mt={30} radius="md" style={{ backgroundColor: theme.colors.dark[6]}}>
+          <form onSubmit={handleSignUp}>
+            <TextInput
+              label="Email"
+              placeholder="youremail@gmail.com"
+              required
+              radius="md"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              styles={(theme) => ({
+                input: {
+                  backgroundColor: theme.colors.dark[6],
+                  color: 'white',           // text color inside input
+                },
+              })}
+            />
+            <PasswordInput
+              label="Password"
+              placeholder="Your password"
+              required
+              mt="md"
+              radius="md"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              styles={(theme) => ({
+                input: {
+                  backgroundColor: theme.colors.dark[6],
+                  color: 'white',           // text color inside input
+                },
+              })}
+            />
+            {error && <Text c="red" size="sm">{error}</Text>} {/* Display error if any */}
 
-          <Group justify="space-between" mt="lg">
-            <Text size="sm">Already have an account?</Text>
-            <Button fullWidth mt="xl" radius="md" type="submit" loading={loading}>
-              Sign Up
-            </Button>
-          </Group>
-        </form>
-      </Paper>
-    </Container>
+            <Group justify="space-between" mt="lg">
+              <Text size="sm">Already have an account?</Text>
+              <Button fullWidth mt="xl" radius="md" type="submit" loading={loading}>
+                Sign Up
+              </Button>
+            </Group>
+          </form>
+        </Paper>
+      </Container>
+    </div>
+    
   );
 }
