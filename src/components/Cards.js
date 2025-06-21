@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react'
 import { useSpring, animated } from 'react-spring'
 import { useLocation } from 'react-router-dom'
 
+// const cards = [
+//   'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
+//   'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
+//   'https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg',
+// ]
 const cards = [
-  'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
-  'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
-  'https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg',
-]
+  '/card_images/Glass_Roar_1.svg',
+  '/card_images/Glass_Roar_1.png',
+  '/card_images/Glass_Roar_1.png',
+];
 
 function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
   const location = useLocation()
