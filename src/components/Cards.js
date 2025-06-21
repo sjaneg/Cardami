@@ -85,9 +85,9 @@ function Deck() {
     }
   }
 
-  // Detectar cuando navegamos a HOME y SIEMPRE activar animación
+  // Detectar cuando navegamos a /home y SIEMPRE activar animación
   useEffect(() => {
-    if (location.pathname === '/') {
+    if (location.pathname === '/home') {
       // Reiniciar todo primero
       setAnimationState(ANIMATION_STATES.HIDDEN)
       setFlippedCards(new Set())
@@ -104,7 +104,7 @@ function Deck() {
 
   // Ocultar cartas cuando salimos de home
   useEffect(() => {
-    if (location.pathname !== '/') {
+    if (location.pathname !== '/home') {
       setAnimationState(ANIMATION_STATES.HIDDEN)
       setFlippedCards(new Set())
       api.start(i => from(i))

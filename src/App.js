@@ -11,6 +11,7 @@ import { PrivateRoute } from './routeGuards/PrivateRoute.js';
 import { PublicRoute } from './routeGuards/PublicRoute.js';
 import { useAuth } from './contexts/AuthProvider.js';
 import Landing from './pages/Landing.js';
+import Cards from './components/Cards.js'
 
 function App() {
 
@@ -39,7 +40,7 @@ function App() {
             <Route path="/signup" element={<PublicRoute><SignUp/></PublicRoute>}/>
 
             {/* Protected Routes */}
-            <Route path="/home" element={<PrivateRoute><>hi</></PrivateRoute>} />
+            <Route path="/home" element={<PrivateRoute><Cards/></PrivateRoute>} />
             <Route path="/memories" element={<PrivateRoute><Memories/></PrivateRoute>} />
             <Route path="/login" element={<PrivateRoute><Login/></PrivateRoute>}/>
             <Route path="/signup" element={<PrivateRoute><SignUp/></PrivateRoute>}/>
