@@ -18,3 +18,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+body {
+  @apply bg-[#3C3C3C] text-white;
+}
