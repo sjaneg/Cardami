@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useSprings, animated, to as interpolate } from 'react-spring'
-import { useDrag } from 'react-use-gesture'
+import { useSpring, animated } from 'react-spring'
 import { useLocation } from 'react-router-dom'
 
 const cards = [
@@ -9,138 +8,133 @@ const cards = [
   'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
 ]
 
-// Color del reverso de la carta
-const cardBackColor = '#ffffff'
-
-// Estados de la animación
-const ANIMATION_STATES = {
-  HIDDEN: 'hidden',
-  SLIDING: 'sliding', 
-  EXPANDED: 'expanded',
-  INTERACTIVE: 'interactive'
-}
-
-// Posiciones iniciales (REALMENTE ocultas, fuera de la pantalla)
-const from = (i) => ({ 
-  x: -600, // MÁS lejos a la izquierda
-  y: i * -2, 
-  scale: 0.9, 
-  rot: 0,
-  rotateY: 0
-})
-
-// Posiciones durante el deslizamiento (mazo compacto en el centro)
-const sliding = (i) => ({
-  x: 0, // Todas las cartas en el mismo lugar (mazo)
-  y: i * -2, // Solo un poquito de separación vertical
-  scale: 0.9,
-  rot: 0, // Sin rotación, todas iguales
-  rotateY: 0,
-  delay: 0 // Todas se mueven juntas
-})
-
-// Posiciones expandidas (abanico)
-const expanded = (i) => ({
-  x: (i - 1) * 140, // Se separan horizontalmente desde el centro
-  y: i * -4,
-  scale: 1,
-  rot: (i - 1) * 15, // Rotación para efecto abanico
-  rotateY: 0,
-  delay: i * 100 // Se abren una por una
-})
-
-const trans = (r, s, rotY) =>
-  `perspective(1500px) rotateX(30deg) rotateY(${rotY}deg) rotateZ(${r}deg) scale(${s})`
-
-function Deck() {
+function Card({ index, image }) {
   const location = useLocation()
-  const [animationState, setAnimationState] = useState(ANIMATION_STATES.HIDDEN)
-  const [flippedCards, setFlippedCards] = useState(new Set())
-  const [gone] = useState(() => new Set())
+  const [isVisible, setIsVisible] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isFlipped, setIsFlipped] = useState(false)
 
-  const [props, api] = useSprings(cards.length, i => ({
-    ...from(i),
-  }))
+  // Animación de entrada desde la izquierda
+  const slideIn = useSpring({
+    transform: isVisible ? 'translateX(0px)' : 'translateX(-900px)',
+    config: { tension: 200, friction: 25 }
+  })
 
-  // Función para iniciar la animación
-  const startAnimation = () => {
-    // Paso 1: Deslizar como mazo hasta el centro
-    setAnimationState(ANIMATION_STATES.SLIDING)
-    api.start(i => sliding(i))
+  // Animación de expansión como abanico
+  const expand = useSpring({
+    transform: isExpanded 
+      ? `translateX(${(index - 1) * 120}px) rotate(${(index - 1) * 15 + (Math.random() * 6 - 3)}deg)` 
+      : 'translateX(0px) rotate(0deg)',
+    config: { tension: 250, friction: 30 }
+  })
 
-    // Paso 2: Expandir como abanico
-    const timer1 = setTimeout(() => {
-      setAnimationState(ANIMATION_STATES.EXPANDED)
-      api.start(i => expanded(i))
-    }, 1200) // Más tiempo para ver el mazo
+  // Animación de volteo
+  const flip = useSpring({
+    transform: `rotateY(${isFlipped ? 180 : 0}deg)`,
+    config: { tension: 300, friction: 30 }
+  })
 
-    // Paso 3: Permitir interacción
-    const timer2 = setTimeout(() => {
-      setAnimationState(ANIMATION_STATES.INTERACTIVE)
-    }, 2000)
-
-    return () => {
-      clearTimeout(timer1)
-      clearTimeout(timer2)
-    }
-  }
-
-  // Detectar cuando navegamos a /home y SIEMPRE activar animación
   useEffect(() => {
     if (location.pathname === '/home') {
-      // Reiniciar todo primero
-      setAnimationState(ANIMATION_STATES.HIDDEN)
-      setFlippedCards(new Set())
-      api.start(i => from(i)) // Resetear a posición inicial
-
-      // Luego iniciar la animación
+      console.log(`🃏 Carta ${index} iniciando secuencia...`)
+      
+      // Paso 1: Aparecer desde la izquierda
+      setIsVisible(true)
+      
+      // Paso 2: Expandir como abanico después de un delay
       const timer = setTimeout(() => {
-        startAnimation()
-      }, 100) // Pequeño delay para que se vea el reset
+        setIsExpanded(true)
+        console.log(`🎯 Carta ${index} expandida`)
+      }, 800 + index * 200) // Cada carta se expande un poco después
 
       return () => clearTimeout(timer)
+    } else {
+      // Reset cuando salimos de home
+      setIsVisible(false)
+      setIsExpanded(false)
+      setIsFlipped(false)
     }
-  }, [location.pathname, api])
+  }, [location.pathname, index])
 
-  // Ocultar cartas cuando salimos de home
-  useEffect(() => {
-    if (location.pathname !== '/home') {
-      setAnimationState(ANIMATION_STATES.HIDDEN)
-      setFlippedCards(new Set())
-      api.start(i => from(i))
+  const handleClick = () => {
+    if (isExpanded) {
+      setIsFlipped(!isFlipped)
     }
-  }, [location.pathname, api])
-
-  // Manejar SOLO el volteo de cartas (sin moverlas)
-  const handleCardClick = (index) => {
-    if (animationState !== ANIMATION_STATES.INTERACTIVE) return
-    
-    setFlippedCards(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(index)) {
-        newSet.delete(index)
-      } else {
-        newSet.add(index)
-      }
-      return newSet
-    })
-
-    // SOLO animar el volteo, mantener posición
-    api.start(i => {
-      if (i !== index) return
-      const isFlipped = !flippedCards.has(index)
-      return {
-        rotateY: isFlipped ? 180 : 0,
-        // NO cambiar x, y, rot, scale - mantener posición del abanico
-        config: { tension: 300, friction: 30 }
-      }
-    })
   }
 
-  // Eliminar completamente la funcionalidad de arrastrar
-  // Las cartas solo se voltean, no se mueven
-  const bind = () => ({}) // Gesture vacío
+  return (
+    <animated.div
+      style={{
+        position: 'absolute',
+        left: '45%',
+        top: '25%',
+        ...slideIn
+      }}
+    >
+      <animated.div
+        style={{
+          ...expand
+        }}
+      >
+        <animated.div
+          onClick={handleClick}
+          style={{
+            width: '140px',
+            height: '210px',
+            borderRadius: '12px',
+            position: 'relative',
+            transformStyle: 'preserve-3d',
+            transform: 'translateX(-50%) translateY(-50%)',
+            cursor: isExpanded ? 'pointer' : 'default',
+            boxShadow: '0 15px 35px rgba(0,0,0,0.4)',
+            ...flip
+          }}
+        >
+          {/* Cara frontal (reverso de la carta) */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backfaceVisibility: 'hidden',
+              borderRadius: '12px',
+              background: 'linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)',
+              border: '3px solid #2c3e50',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#2c3e50',
+              fontSize: '32px',
+              fontWeight: 'bold',
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            ♠
+          </div>
+          
+          {/* Cara trasera (imagen de la carta) */}
+          <div
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              borderRadius: '12px',
+              backgroundImage: `url(${image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              border: '3px solid #2c3e50',
+              boxShadow: 'inset 0 0 20px rgba(0,0,0,0.2)'
+            }}
+          />
+        </animated.div>
+      </animated.div>
+    </animated.div>
+  )
+}
 
+function Deck() {
   return (
     <div style={{ 
       position: 'relative', 
@@ -152,78 +146,13 @@ function Deck() {
       background: '#000000',
       overflow: 'hidden'
     }}>
-      {props.map(({ x, y, rot, scale, rotateY }, i) => (
-        <animated.div
-          key={i}
-          style={{
-            position: 'absolute',
-            x,
-            y,
-            cursor: animationState === ANIMATION_STATES.INTERACTIVE ? 'pointer' : 'default'
-          }}
-        >
-          <animated.div
-            onClick={() => handleCardClick(i)}
-            style={{
-              width: '140px',
-              height: '210px',
-              borderRadius: '10px',
-              position: 'relative',
-              transformStyle: 'preserve-3d',
-              transform: interpolate([rot, scale, rotateY], trans),
-              willChange: 'transform',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-            }}
-          >
-            {/* Cara frontal (reverso de la carta) */}
-            <div
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                backfaceVisibility: 'hidden',
-                borderRadius: '10px',
-                backgroundColor: cardBackColor,
-                border: '2px solid #333333',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#000000',
-                fontSize: '24px',
-                fontWeight: 'bold'
-              }}
-            >
-              ♠
-            </div>
-            
-            {/* Cara trasera (imagen de la carta) */}
-            <div
-              style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                backfaceVisibility: 'hidden',
-                transform: 'rotateY(180deg)',
-                borderRadius: '10px',
-                backgroundImage: `url(${cards[i]})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                border: '2px solid #333333'
-              }}
-            />
-          </animated.div>
-        </animated.div>
+      {cards.map((card, index) => (
+        <Card key={index} index={index} image={card} />
       ))}
-      
-      {/* Sin indicadores molestos */}
     </div>
   )
 }
 
 export default function Cards() {
-  return (
-    <div>
-      <Deck />
-    </div>
-  )
+  return <Deck />
 }

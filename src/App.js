@@ -35,7 +35,7 @@ function App() {
 
             <Route path="/" element={<Landing/>}/>
 
-            [/*only pages users can see when not logged in*/]
+            {/*only pages users can see when not logged in*/}
             <Route path="/login" element={<PublicRoute><Login/></PublicRoute>}/>
             <Route path="/signup" element={<PublicRoute><SignUp/></PublicRoute>}/>
 
