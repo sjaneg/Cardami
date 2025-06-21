@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useSprings, animated, to as interpolate } from 'react-spring'
+import { useSprings, animated, to as interpolate } from '@react-spring/web'
 import { useDrag } from 'react-use-gesture'
 
 const cards = [
@@ -8,8 +8,8 @@ const cards = [
   'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
 ]
 
-// Color del reverso de la carta
-const cardBackColor = '#ffffff'
+// Imagen del reverso de la carta
+const cardBackColor = '#1a1a1a'
 
 // Estados de la animación
 const ANIMATION_STATES = {
@@ -148,7 +148,7 @@ function Deck() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: '#000000',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       overflow: 'hidden'
     }}>
       {props.map(({ x, y, rot, scale, rotateY }, i) => (
@@ -183,18 +183,12 @@ function Deck() {
                 height: '100%',
                 backfaceVisibility: 'hidden',
                 borderRadius: '10px',
-                backgroundColor: cardBackColor,
-                border: '2px solid #333333',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#000000',
-                fontSize: '24px',
-                fontWeight: 'bold'
+                backgroundImage: `url(${cardBack})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                border: '2px solid #f59e0b'
               }}
-            >
-              ♠
-            </div>
+            />
             
             {/* Cara trasera (imagen de la carta) */}
             <div
@@ -208,20 +202,32 @@ function Deck() {
                 backgroundImage: `url(${cards[i]})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                border: '2px solid #333333'
+                border: '2px solid #f59e0b'
               }}
             />
           </animated.div>
         </animated.div>
       ))}
+      
+      {/* Indicador de estado */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        left: '20px',
+        color: 'white',
+        fontSize: '18px',
+        fontWeight: 'bold',
+        textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+      }}>
+        {animationState === ANIMATION_STATES.HIDDEN && 'Preparando cartas...'}
+        {animationState === ANIMATION_STATES.SLIDING && 'Deslizando cartas...'}
+        {animationState === ANIMATION_STATES.EXPANDED && 'Expandiendo cartas...'}
+        {animationState === ANIMATION_STATES.INTERACTIVE && 'Haz click para voltear las cartas'}
+      </div>
     </div>
   )
 }
 
-export default function Memories() {
-  return (
-    <div>
-      <Deck />
-    </div>
-  )
+export default function App() {
+  return <Deck />
 }
