@@ -13,7 +13,7 @@ export default function NavBar() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/login"); // Redirect to login after logout
+      navigate("/"); // Redirect to login after logout
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -31,9 +31,7 @@ export default function NavBar() {
             </Link>
             <span
               onClick={handleLogout}
-              className={`ml-auto cursor-pointer hover:text-gray-400 font-audiowide px-4 py-2 text-xl ${
-                currentPath === "/logout" ? "underline underline-offset-4" : ""
-              }`}
+              className={'ml-auto cursor-pointer hover:text-gray-400 font-audiowide px-4 py-2 text-xl'}
             >
               Logout
             </span>
