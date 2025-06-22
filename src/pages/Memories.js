@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSpring, animated, config } from 'react-spring';
+import { useSpring, useSprings, animated, config } from 'react-spring';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -29,9 +29,7 @@ const masterCards = [
   { id: 'Wuthering_Compass_1', image: '/card_images/Wuthering_Compass_1.png', num: 14 },
 ];
 
-function MemoryCard({ image, description, isClaimed }) {
-  const [flipped, setFlipped] = useState(false);
-
+function MemoryCard({ image, description, isClaimed, flipped, onFlip }) {
   const { transform, opacity } = useSpring({
     transform: `perspective(600px) rotateY(${flipped ? 180 : 0}deg)`,
     opacity: flipped ? 1 : 0,
@@ -41,8 +39,9 @@ function MemoryCard({ image, description, isClaimed }) {
   return (
     <div
       className={`card-item ${!isClaimed ? 'disabled' : ''}`}
-      onClick={isClaimed ? () => setFlipped(f => !f) : undefined}
+      onClick={isClaimed ? onFlip : undefined}
     >
+      {/* Front */}
       <animated.div
         className="card-face"
         style={{
@@ -54,10 +53,13 @@ function MemoryCard({ image, description, isClaimed }) {
         <img
           src={image}
           alt="memory front"
-          style={{ filter: isClaimed ? 'none' : 'grayscale(100%) opacity(0.3)' }}
+          style={{
+            filter: isClaimed ? 'none' : 'grayscale(100%) opacity(0.3)',
+          }}
         />
       </animated.div>
 
+      {/* Back */}
       <animated.div
         className="card-face card-back"
         style={{
@@ -74,6 +76,23 @@ function MemoryCard({ image, description, isClaimed }) {
 
 export default function Memories() {
   const [claimed, setClaimed] = useState(null);
+  const [flippedStates, setFlippedStates] = useState({});
+
+  const sortedCards = [...masterCards].sort((a, b) => a.num - b.num);
+
+  const entranceSpring = useSpring({
+    from: { transform: 'translateY(300px)', opacity: 0 },
+    to: { transform: 'translateY(0)', opacity: 1 },
+    delay: 300,
+    config: { tension: 100, friction: 25 }, // slower entry
+  });
+  
+  const [cardSprings, api] = useSprings(sortedCards.length, index => ({
+    from: { transform: 'scale(0) rotateZ(-30deg)', opacity: 0 },
+    to: { transform: 'scale(1) rotateZ(0deg)', opacity: 1 },
+    delay: 600 + index * 150, // increase delay spacing
+    config: { tension: 120, friction: 20 }, // slower toss
+  }));
 
   useEffect(() => {
     async function fetchData() {
@@ -86,37 +105,40 @@ export default function Memories() {
     fetchData();
   }, []);
 
-  if (claimed === null) {
-    return (
-      <Center style={{ height: '100vh' }}>
-        <Loader />
-      </Center>
-    );
-  }
-
   const claimedMap = Object.fromEntries(
-    claimed.map(({ cardId, description }) => [cardId, description])
+    (claimed || []).map(({ cardId, description }) => [cardId, description])
   );
 
-  const sortedCards = [...masterCards].sort((a, b) => a.num - b.num);
+  const handleFlip = (id) => {
+    setFlippedStates(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <div className="memories-container">
-      {sortedCards.length === 0 ? (
-        <p className="no-memories">
-          No whispers yet in your hall of memories — claim a card and let its story unfold.
-        </p>
+      {claimed === null ? (
+        <Center style={{ height: '100vh' }}>
+          <Loader />
+        </Center>
       ) : (
-        <div className="card-grid">
-          {sortedCards.map(card => (
-            <MemoryCard
-              key={card.id}
-              image={card.image}
-              description={claimedMap[card.id] || ''}
-              isClaimed={claimedMap.hasOwnProperty(card.id)}
-            />
-          ))}
-        </div>
+        <animated.div style={entranceSpring}>
+          <div className="card-grid">
+            {cardSprings.map((style, i) => {
+              const card = sortedCards[i];
+              const isClaimed = claimedMap.hasOwnProperty(card.id);
+              return (
+                <animated.div key={card.id} style={style}>
+                  <MemoryCard
+                    image={card.image}
+                    description={claimedMap[card.id] || ''}
+                    isClaimed={isClaimed}
+                    flipped={!!flippedStates[card.id]}
+                    onFlip={() => handleFlip(card.id)}
+                  />
+                </animated.div>
+              );
+            })}
+          </div>
+        </animated.div>
       )}
     </div>
   );

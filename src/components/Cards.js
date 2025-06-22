@@ -119,17 +119,15 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     }
   }, [location.pathname, index, shuffling]);
 
-  // Click on card = card flips and becomes large (original functionality)
   const handleClick = () => {
     if (!isExpanded) return;
     setIsFlipped(true);
-    setFlippedCards(prev => new Set(prev).add(index));
-    setSelectedCardIndices(prev => new Set(prev).add(index));
+    setFlippedCards((prev) => new Set(prev).add(index));
+    setSelectedCardIndices((prev) => new Set(prev).add(index));
   };
 
-  // Click on Claim = open Figma modal
   const handleClaim = (e) => {
-    e.stopPropagation(); // Prevents card click from triggering
+    e.stopPropagation();
     onClaim(card, index);
   };
 
@@ -195,17 +193,17 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
                 zIndex: 1
               }}>
                 <Button
-                  style={{ 
-                    padding: '6px 16px', 
-                    fontSize: 12, 
-                    background: 'rgba(255, 255, 255, 0.2)', 
+                  style={{
+                    padding: '6px 16px',
+                    fontSize: 12,
+                    background: 'rgba(255, 255, 255, 0.2)',
                     color: '#ffffff',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '6px', 
-                    fontWeight: '500', 
+                    borderRadius: '6px',
+                    fontWeight: '500',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(8px)'
+                    backdropFilter: 'blur(8px)',
                   }}
                   size="xs"
                   onClick={handleClaim}
@@ -220,6 +218,7 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     </animated.div>
   );
 }
+
 
 function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
   const [taskDescription, setTaskDescription] = useState('');
@@ -252,11 +251,10 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
         <div style={{
           width: '300px',
           height: '450px',
-          borderRadius: '16px',
+          borderRadius: '8px',
           backgroundImage: `url(${selectedCard.image})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          border: '3px solid #2c3e50',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
         }} />
       </div>
