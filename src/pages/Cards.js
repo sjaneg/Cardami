@@ -223,12 +223,19 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
 
 function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
   const [taskDescription, setTaskDescription] = useState('');
+const [showSparkle, setShowSparkle] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSparkle(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAdd = () => {
     onAddToDeck(selectedCard.id, taskDescription.trim());
     setTaskDescription('');
     onBack();
   };
+
 
   return (
     <div style={{
@@ -259,6 +266,26 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
           border: '3px solid #2c3e50',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
         }} />
+        {showSparkle && (
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-20">
+          {[...Array(10)].map((_, i) => {
+            const hue = Math.floor(Math.random() * 360); // Hue between 0–359
+            return (
+              <div
+                key={i}
+                className="absolute w-2 h-2 rounded-full animate-sparkle"
+                style={{
+                  top: `${Math.random() * 90}%`,
+                  left: `${Math.random() * 90}%`,
+                  backgroundColor: `hsl(${hue}, 100%, 70%)`,
+                  animationDelay: `${i * 0.1}s`,
+                  boxShadow: `0 0 6px 2px hsl(${hue}, 100%, 70%)`,
+                }}
+              />
+            );
+          })}
+        </div>
+        )}
       </div>
 
       {/* Right side - Input panel */}
@@ -377,7 +404,7 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
               }
             }}
           >
-            Add to Memories
+            Add to Deck
           </button>
         </div>
       </div>
@@ -500,7 +527,7 @@ export default function Cards() {
         {isAllFlipped && !shuffling && (
           <Button 
             style={{ 
-              borderRadius: '16px',
+              borderRadius: '9999px',
               position: 'absolute', 
               bottom: 30, 
               left: '50%', 
@@ -512,14 +539,7 @@ export default function Cards() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              whiteSpace: 'nowrap',
-              background: 'rgba(255, 255, 255, 0.2)', 
-              color: '#ffffff',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              fontWeight: '500', 
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              backdropFilter: 'blur(8px)'
+              whiteSpace: 'nowrap'
             }} 
             onClick={shuffleCards}
           >
