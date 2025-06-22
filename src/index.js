@@ -13,7 +13,7 @@ root.render(
   <BrowserRouter>
     <MantineProvider theme={{colorScheme:'dark'}} withGlobalStyles withNormalizeCSS>
       <AuthProvider>
-      <div className="bg-black min-h-screen text-white">
+      <div className="bg-gradient-to-br from-neutral-800 to-black min-h-screen text-white">
         <App />
       </div>
       </AuthProvider>

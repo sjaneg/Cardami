@@ -6,7 +6,7 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen text-center bg-black text-white px-4">
+    <div className="flex flex-col justify-center items-center h-screen text-center text-white px-4">
       <h1 className="text-6xl font-extrabold font-audiowide tracking-wide mb-6">
         Cardami
       </h1>
