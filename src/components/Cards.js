@@ -29,7 +29,7 @@ const masterCards = [
   { id: 'Whisper_Coin_1', image: '/card_images/Whisper_Coin_1.png' },
 ];
 
-function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards, onClaim }) {
+function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards, onClaim, shuffling }) {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -39,8 +39,10 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   const isSelected = selectedCardIndices.has(index);
   const isFlippedLocal = flippedCards.has(index);
 
-  // Sync flip state
-  useEffect(() => { if (isFlippedLocal) setIsFlipped(true); }, [isFlippedLocal]);
+  // Sync flip state - but not during shuffle
+  useEffect(() => { 
+    if (isFlippedLocal && !shuffling) setIsFlipped(true); 
+  }, [isFlippedLocal, shuffling]);
 
   // Smooth card entrance - like solitaire games
   const cardEntrance = useSpring({ 
@@ -49,21 +51,26 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     config: { tension: 120, friction: 14 } // Very smooth, slow ease
   });
   
-  // Fan expansion with solitaire-like smoothness
+  // Fan expansion with solitaire-like smoothness + reshuffle behavior
   const fanExpansion = useSpring({ 
-    transform: isExpanded && !isSelected 
-      ? `translateX(${(index - 1) * 110}px) rotate(${(index - 1) * 10}deg)` 
-      : 'translateX(0px) rotate(0deg)',
+    transform: shuffling 
+      ? 'translateX(0px) rotate(0deg)' // Stack back to center when shuffling
+      : isExpanded && !isSelected 
+        ? `translateX(${(index - 1) * 110}px) rotate(${(index - 1) * 10}deg)` 
+        : 'translateX(0px) rotate(0deg)',
     config: { 
-      tension: 80,   // Gentle tension
-      friction: 26,  // High friction for smooth deceleration
-      mass: 1.2,     // Slight weight feeling
-      clamp: false   // Allow natural overshoot and settle
+      tension: shuffling ? 120 : 80,   // Faster when shuffling
+      friction: shuffling ? 20 : 26,   // Less friction when shuffling
+      mass: 1.2,
+      clamp: false
     }
   });
 
-  // Flip animation
-  const flip = useSpring({ transform: `rotateY(${isFlipped ? 180 : 0}deg)`, config: { tension: 300, friction: 30 } });
+  // Flip animation with shuffle behavior
+  const flip = useSpring({ 
+    transform: `rotateY(${isFlipped && !shuffling ? 180 : 0}deg)`, 
+    config: { tension: 300, friction: 30 } 
+  });
   const positionSpring = useSpring({ 
     left: isSelected ? (index === 0 ? '25%' : index === 1 ? '50%' : '75%') : '50%', // Start from center
     top: isSelected ? '50%' : '40%', // Moved up from 50% to 40%
@@ -73,9 +80,9 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     opacity: 1
   });
 
-  // Handle route changes - staggered smooth entrance like solitaire
+  // Handle route changes + shuffle reset
   useEffect(() => {
-    if (location.pathname === '/home') {
+    if (location.pathname === '/home' && !shuffling) {
       setIsVisible(true);
       setIsFlipped(false);
       
@@ -86,12 +93,16 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
       }, expandDelay + 200); // Small base delay
       
       return () => clearTimeout(timer);
+    } else if (shuffling) {
+      // During shuffle, reset expanded state so cards stack back
+      setIsExpanded(false);
+      setIsFlipped(false);
     } else {
       setIsVisible(false);
       setIsExpanded(false);
       setIsFlipped(false);
     }
-  }, [location.pathname, index]);
+  }, [location.pathname, index, shuffling]);
 
   // Click on card = card flips and becomes large (original functionality)
   const handleClick = () => {
@@ -392,18 +403,18 @@ export default function Cards() {
   
   const shuffleCards = () => { 
     setShuffling(true); 
-    
-    // Reset all card states immediately
-    setFlippedCards(new Set()); 
-    setSelectedCardIndices(new Set()); 
     setShowTaskDetail(false);
     setSelectedCard(null);
     
-    // Generate new cards after animation completes
+    // Step 1: Flip all cards back to show "Cardami" side
+    setFlippedCards(new Set()); 
+    setSelectedCardIndices(new Set());
+    
+    // Step 2: After flip animation, generate new cards and restart the fan animation
     setTimeout(() => {
       selectThree(); // Pick 3 new random unclaimed cards
       setShuffling(false);
-    }, 800); // Longer delay to let animations settle
+    }, 1200); // Give time for flip + restack + expand
   };
 
   // Function called when Claim button is clicked
@@ -487,6 +498,7 @@ export default function Cards() {
             flippedCards={flippedCards} 
             setFlippedCards={setFlippedCards} 
             onClaim={handleClaim}
+            shuffling={shuffling} // Pass shuffling state to Card
           />
         ))}
         {isAllFlipped && !shuffling && (
