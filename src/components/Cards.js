@@ -35,9 +35,24 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState({ width: 200, height: 300 }); // Default size
 
   const isSelected = selectedCardIndices.has(index);
   const isFlippedLocal = flippedCards.has(index);
+
+  // Load image and get dimensions
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      const maxHeight = 300; // Max height we want
+      const newHeight = Math.min(maxHeight, img.height);
+      const newWidth = newHeight * aspectRatio;
+      
+      setImageDimensions({ width: newWidth, height: newHeight });
+    };
+    img.src = card.image;
+  }, [card.image]);
 
   // Sync flip state - but not during shuffle
   useEffect(() => { 
@@ -123,7 +138,17 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
       <animated.div style={fanExpansion}>
         <animated.div
           onClick={handleClick}
-          style={{ width: 200, height: 300, borderRadius: 12, position: 'relative', transformStyle: 'preserve-3d', cursor: isExpanded ? 'pointer' : 'default', boxShadow: '0 15px 35px rgba(0,0,0,0.4)', ...flip }}
+          style={{ 
+            width: imageDimensions.width, 
+            height: imageDimensions.height, 
+            borderRadius: 12, 
+            position: 'relative', 
+            transformStyle: 'preserve-3d', 
+            cursor: isExpanded ? 'pointer' : 'default', 
+            boxShadow: '0 15px 35px rgba(0,0,0,0.4)', 
+            border: isSelected ? 'none' : 'none', // Remove all borders
+            ...flip 
+          }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -139,7 +164,6 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
               backgroundImage: `url(${card.image})`, 
               backgroundSize: 'cover', 
               backgroundPosition: 'center', 
-              border: '3px solid #2c3e50', 
               filter: isHovered ? 'grayscale(80%)' : 'none' 
             }}
           >
