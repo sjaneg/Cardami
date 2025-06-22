@@ -432,7 +432,21 @@ export default function Cards() {
           />
         ))}
         {isAllFlipped && !shuffling && (
-          <Button variant="outline" style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', padding: '15px 30px', fontSize: 18 }} onClick={shuffleCards}>
+          <Button
+            size="md"
+            px="xl"
+            style={{
+              borderRadius: 9999,
+              position: 'absolute',
+              bottom: 50,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              height: '50px',
+              lineHeight: '50px', // match height to center text vertically
+              whiteSpace: 'nowrap', // prevent wrapping
+            }}
+            onClick={shuffleCards}
+          >
             Shuffle
           </Button>
         )}
