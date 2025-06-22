@@ -377,7 +377,7 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
               }
             }}
           >
-            Add to Deck
+            Add to Memories
           </button>
         </div>
       </div>
@@ -500,7 +500,7 @@ export default function Cards() {
         {isAllFlipped && !shuffling && (
           <Button 
             style={{ 
-              borderRadius: '9999px',
+              borderRadius: '16px',
               position: 'absolute', 
               bottom: 30, 
               left: '50%', 
@@ -512,7 +512,14 @@ export default function Cards() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              background: 'rgba(255, 255, 255, 0.2)', 
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              fontWeight: '500', 
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(8px)'
             }} 
             onClick={shuffleCards}
           >
