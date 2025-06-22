@@ -1,42 +1,41 @@
-/* src/components/Memories.css */
-
 .memories-container {
-    padding: 1rem;
-    background: #000;
-    min-height: 100vh;
-    color: #fff;
-  }
-  
-  .no-memories {
-    text-align: center;
-    margin-top: 2rem;
-    font-size: 1.2rem;
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: center;
   }
   
   .card-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-    justify-items: center;
-    padding: 2rem 0;
+    grid-template-columns: repeat(5, 180px);
+    gap: 2rem;
+    justify-content: center;
   }
   
   .card-item {
-    width: 200px;
-    height: 300px;
+    width: 180px;
+    height: 270px;
+    perspective: 1000px;
     position: relative;
-    perspective: 600px;
     cursor: pointer;
   }
   
+  .card-item.disabled {
+    pointer-events: none;
+  }
+  
   .card-face {
-    position: absolute;
     width: 100%;
     height: 100%;
+    position: absolute;
     backface-visibility: hidden;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    border: 2px solid #444;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .card-face img {
@@ -46,16 +45,12 @@
   }
   
   .card-back {
-    background: #1a1b1e;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transform: rotateY(180deg);
     padding: 1rem;
-  }
-  
-  .card-back-content {
     color: #fff;
-    font-size: 0.9rem;
+    background-color: #333;
+    font-size: 0.85rem;
     text-align: center;
+    white-space: pre-wrap;
   }
   
