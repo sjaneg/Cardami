@@ -29,7 +29,7 @@ const masterCards = [
   { id: 'Whisper_Coin_1', image: '/card_images/Whisper_Coin_1.png' },
 ];
 
-function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards, onClaim, shuffling }) {
+function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards, onClaim, shuffling, allCardsFlipped }) {
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -160,15 +160,27 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
               height: '100%', 
               backfaceVisibility: 'hidden', 
               transform: 'rotateY(180deg)', 
-              borderRadius: 12, 
-              backgroundImage: `url(${card.image})`, 
-              backgroundSize: 'cover', 
-              backgroundPosition: 'center', 
-              filter: isHovered ? 'grayscale(80%)' : 'none' 
+              borderRadius: 6
             }}
           >
-            {/* Overlay when card is selected */}
-            {isSelected && (
+            {/* Imagen de fondo separada que se puede difuminar */}
+            <div 
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                borderRadius: 6,
+                backgroundImage: `url(${card.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: isHovered && allCardsFlipped ? 'blur(1px)' : 'none'
+              }}
+            />
+            
+            {/* Overlay when card is selected AND all cards are flipped AND being hovered */}
+            {isSelected && allCardsFlipped && isHovered && (
               <div style={{
                 position: 'absolute',
                 top: 0,
@@ -178,9 +190,9 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
                 backgroundColor: 'rgba(0, 0, 0, 0.4)',
                 borderRadius: '12px',
                 display: 'flex',
-                alignItems: 'flex-end',
+                alignItems: 'center',
                 justifyContent: 'center',
-                paddingBottom: '20px'
+                zIndex: 1
               }}>
                 <Button
                   style={{ 
@@ -329,47 +341,6 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
                 e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
               }}
             />
-          </div>
-
-          {/* Snapshot section */}
-          <div style={{
-            textAlign: 'center',
-            marginBottom: '32px',
-            padding: '20px 0'
-          }}>
-            <div style={{
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: '14px',
-              marginBottom: '12px'
-            }}>
-              or in a snapshot
-            </div>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              margin: '0 auto',
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.15)';
-              e.target.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.target.style.transform = 'translateY(0)';
-            }}
-            >
-              <svg width="24" height="24" fill="rgba(255, 255, 255, 0.7)" viewBox="0 0 24 24">
-                <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3Z"/>
-                <path d="M12 6.5A2.5 2.5 0 0 1 9.5 4h5A2.5 2.5 0 0 1 12 6.5ZM9 2a1 1 0 0 0-1 1v1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-3V3a1 1 0 0 0-1-1H9Z"/>
-              </svg>
-            </div>
           </div>
 
           {/* Add to Deck button */}
@@ -523,6 +494,7 @@ export default function Cards() {
             setFlippedCards={setFlippedCards} 
             onClaim={handleClaim}
             shuffling={shuffling} // Pass shuffling state to Card
+            allCardsFlipped={isAllFlipped} // Pass if all cards are flipped
           />
         ))}
         {isAllFlipped && !shuffling && (
