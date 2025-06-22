@@ -24,7 +24,8 @@
   }
   
   .card-face {
-    width: 100%;
+    width: 105%;
+    height: 100%;
     position: absolute;
     backface-visibility: hidden;
     border-radius: 5px;
