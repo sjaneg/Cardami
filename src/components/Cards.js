@@ -119,15 +119,17 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     }
   }, [location.pathname, index, shuffling]);
 
+  // Click on card = card flips and becomes large (original functionality)
   const handleClick = () => {
     if (!isExpanded) return;
     setIsFlipped(true);
-    setFlippedCards((prev) => new Set(prev).add(index));
-    setSelectedCardIndices((prev) => new Set(prev).add(index));
+    setFlippedCards(prev => new Set(prev).add(index));
+    setSelectedCardIndices(prev => new Set(prev).add(index));
   };
 
+  // Click on Claim = open Figma modal
   const handleClaim = (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevents card click from triggering
     onClaim(card, index);
   };
 
@@ -193,17 +195,17 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
                 zIndex: 1
               }}>
                 <Button
-                  style={{
-                    padding: '6px 16px',
-                    fontSize: 12,
-                    background: 'rgba(255, 255, 255, 0.2)',
+                  style={{ 
+                    padding: '6px 16px', 
+                    fontSize: 12, 
+                    background: 'rgba(255, 255, 255, 0.2)', 
                     color: '#ffffff',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '6px',
-                    fontWeight: '500',
+                    borderRadius: '6px', 
+                    fontWeight: '500', 
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(8px)',
+                    backdropFilter: 'blur(8px)'
                   }}
                   size="xs"
                   onClick={handleClaim}
@@ -218,7 +220,6 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     </animated.div>
   );
 }
-
 
 function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
   const [taskDescription, setTaskDescription] = useState('');
@@ -251,10 +252,11 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
         <div style={{
           width: '300px',
           height: '450px',
-          borderRadius: '8px',
+          borderRadius: '16px',
           backgroundImage: `url(${selectedCard.image})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
+          border: '3px solid #2c3e50',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
         }} />
       </div>
@@ -274,35 +276,38 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '20px',
-          padding: '40px',
+          padding: '60px 40px 40px 40px', // Increased top padding to make room for close button
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.3)',
           position: 'relative'
         }}>
-          {/* Close button */}
+          {/* Close button - positioned outside the content area */}
           <button
             onClick={onBack}
             style={{
               position: 'absolute',
-              top: '20px',
-              right: '20px',
+              top: '16px', // Moved higher up
+              right: '16px', // Moved further right
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '50%',
-              width: '40px',
-              height: '40px',
+              width: '44px', // Slightly larger for better touch target
+              height: '44px',
               color: '#ffffff',
-              fontSize: '18px',
+              fontSize: '20px', // Slightly larger icon
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              zIndex: 10 // Ensure it's on top
             }}
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.transform = 'scale(1.1)';
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.transform = 'scale(1)';
             }}
           >
             ×
@@ -496,7 +501,24 @@ export default function Cards() {
           />
         ))}
         {isAllFlipped && !shuffling && (
-          <Button variant="outline" style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', padding: '15px 30px', fontSize: 18 }} onClick={shuffleCards}>
+          <Button 
+            style={{ 
+              borderRadius: '9999px',
+              position: 'absolute', 
+              bottom: 30, 
+              left: '50%', 
+              transform: 'translateX(-50%)', 
+              padding: '16px 32px', 
+              fontSize: 18,
+              minWidth: '120px',
+              height: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              whiteSpace: 'nowrap'
+            }} 
+            onClick={shuffleCards}
+          >
             Shuffle
           </Button>
         )}
