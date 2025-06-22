@@ -42,33 +42,30 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   // Sync flip state
   useEffect(() => { if (isFlippedLocal) setIsFlipped(true); }, [isFlippedLocal]);
 
-  // Entry animation
-  const slideIn = useSpring({ transform: isVisible ? 'translateX(0)' : 'translateX(-900px)', config: { tension: 200, friction: 25 } });
-  // Fan expand animation (remove random rotation to fix bugs)
-  const expand = useSpring({ 
-    transform: isExpanded && !isSelected 
-      ? `translateX(${(index - 1) * 120}px) rotate(${(index - 1) * 15}deg)` 
-      : 'translateX(0) rotate(0deg)', 
-    config: { tension: 250, friction: 30 } 
+  // Simple fade in animation
+  const fadeIn = useSpring({ 
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? 'translateY(0px)' : 'translateY(50px)',
+    config: { tension: 200, friction: 25 }
   });
+
   // Flip animation
   const flip = useSpring({ transform: `rotateY(${isFlipped ? 180 : 0}deg)`, config: { tension: 300, friction: 30 } });
   const positionSpring = useSpring({ 
-    left: isSelected ? (index === 0 ? '25%' : index === 1 ? '50%' : '75%') : '45%', 
-    top: isSelected ? '50%' : '25%', 
+    left: isSelected ? (index === 0 ? '25%' : index === 1 ? '50%' : '75%') : `${30 + (index * 20)}%`, // Horizontal row positions
+    top: isSelected ? '50%' : '50%', // All cards at center height
     transform: `translate(-50%, -50%) scale(${isSelected ? 2 : 1})`, 
     config: { tension: 300, friction: 30 }, 
-    zIndex: isSelected ? 999 : index === 1 ? 5 : 1,
-    opacity: 1 // Force opacity to always be 1
+    zIndex: isSelected ? 999 : 1, // Remove middle card z-index priority
+    opacity: 1
   });
 
-  // Handle route changes
+  // Handle route changes - simple fade in with minimal delay
   useEffect(() => {
     if (location.pathname === '/home') {
       setIsVisible(true);
-      setIsFlipped(false); // Always start with Cardami side showing
-      const timer = setTimeout(() => setIsExpanded(true), 800 + index * 200);
-      return () => clearTimeout(timer);
+      setIsFlipped(false);
+      setIsExpanded(true); // Cards are immediately interactive
     } else {
       setIsVisible(false);
       setIsExpanded(false);
@@ -91,14 +88,13 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   };
 
   return (
-    <animated.div style={{ position: 'absolute', ...slideIn, ...positionSpring }}>
-      <animated.div style={expand}>
-        <animated.div
-          onClick={handleClick}
-          style={{ width: 140, height: 210, borderRadius: 12, position: 'relative', transformStyle: 'preserve-3d', cursor: isExpanded ? 'pointer' : 'default', boxShadow: '0 15px 35px rgba(0,0,0,0.4)', ...flip }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
+    <animated.div style={{ position: 'absolute', ...fadeIn, ...positionSpring }}>
+      <animated.div
+        onClick={handleClick}
+        style={{ width: 140, height: 210, borderRadius: 12, position: 'relative', transformStyle: 'preserve-3d', cursor: isExpanded ? 'pointer' : 'default', boxShadow: '0 15px 35px rgba(0,0,0,0.4)', ...flip }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
           <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, background: 'linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)', border: '3px solid #2c3e50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontFamily: 'audiowide', fontWeight: 'bold', color: '#2c3e50' }}>Cardami</div>
           <animated.div
             style={{ 
@@ -152,7 +148,6 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
             )}
           </animated.div>
         </animated.div>
-      </animated.div>
     </animated.div>
   );
 }
@@ -277,6 +272,47 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
                 e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
               }}
             />
+          </div>
+
+          {/* Snapshot section */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '32px',
+            padding: '20px 0'
+          }}>
+            <div style={{
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontSize: '14px',
+              marginBottom: '12px'
+            }}>
+              or in a snapshot
+            </div>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              margin: '0 auto',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+              e.target.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.transform = 'translateY(0)';
+            }}
+            >
+              <svg width="24" height="24" fill="rgba(255, 255, 255, 0.7)" viewBox="0 0 24 24">
+                <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3Z"/>
+                <path d="M12 6.5A2.5 2.5 0 0 1 9.5 4h5A2.5 2.5 0 0 1 12 6.5ZM9 2a1 1 0 0 0-1 1v1H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1h-3V3a1 1 0 0 0-1-1H9Z"/>
+              </svg>
+            </div>
           </div>
 
           {/* Add to Deck button */}
@@ -432,21 +468,7 @@ export default function Cards() {
           />
         ))}
         {isAllFlipped && !shuffling && (
-          <Button
-            size="md"
-            px="xl"
-            style={{
-              borderRadius: 9999,
-              position: 'absolute',
-              bottom: 50,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              height: '50px',
-              lineHeight: '50px', // match height to center text vertically
-              whiteSpace: 'nowrap', // prevent wrapping
-            }}
-            onClick={shuffleCards}
-          >
+          <Button variant="outline" style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', padding: '15px 30px', fontSize: 18 }} onClick={shuffleCards}>
             Shuffle
           </Button>
         )}
