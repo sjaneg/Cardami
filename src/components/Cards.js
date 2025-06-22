@@ -6,7 +6,6 @@ import { MantineProvider, Button, Loader, Center } from '@mantine/core';
 import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase'; // initialized Firestore as db
-import LogClaimedCards from '../pages/ClaimedCards';
 
 // Full master list of cards
 const masterCards = [
@@ -94,7 +93,7 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, background: 'linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)', border: '3px solid #2c3e50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 'bold', color: '#2c3e50' }}>♠</div>
+          <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, background: 'linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)', border: '3px solid #2c3e50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontFamily: 'audiowide', fontWeight: 'bold', color: '#2c3e50' }}>Cardami</div>
           <animated.div
             style={{ 
               position: 'absolute', 
