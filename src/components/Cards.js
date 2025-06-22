@@ -1,17 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useLocation } from 'react-router-dom';
-import { MantineProvider, Button } from '@mantine/core';
+import { MantineProvider, Button, Loader, Center } from '@mantine/core';
 // Firebase imports
-import { doc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase'; // initialized Firestore as db
 
-// Define card objects with id and image path
-const initialCards = [
+// Full master list of cards
+const masterCards = [
+  { id: 'Bottle_of_Joy_1', image: '/card_images/Bottle_of_Joy_1.png' },
+  { id: 'Brave_Battle_Horn_1', image: '/card_images/Brave_Battle_Horn_1.png' },
+  { id: 'Dewbloom_1', image: '/card_images/Dewbloom_1.png' },
+  { id: 'Echo_Drum_1', image: '/card_images/Echo_Drum_1.png' },
+  { id: 'Everlasting_Seedpouch_1', image: '/card_images/Everlasting_Seedpouch_1.png' },
+  { id: 'Feather_of_First_Flight_1', image: '/card_images/Feather_of_First_Flight_1.png' },
   { id: 'Glass_Roar_1', image: '/card_images/Glass_Roar_1.png' },
-  { id: 'Glass_Roar_2', image: '/card_images/Glass_Roar_2.png' },
-  { id: 'Glass_Roar_3', image: '/card_images/Glass_Roar_3.png' },
+  { id: 'Heritage_Patch_1', image: '/card_images/Heritage_Patch_1.png' },
+  { id: 'Kindkey_1', image: '/card_images/Kindkey_1.png' },
+  { id: 'Merchant_Crest_1', image: '/card_images/Merchant_Crest_1.png' },
+  { id: 'Mirrorleaf_Locket_1', image: '/card_images/Mirrorleaf_Locket_1.png' },
+  { id: 'Resonant_Bell_1', image: '/card_images/Resonant_Bell_1.png' },
+  { id: 'Smoothstone_1', image: '/card_images/Smoothstone_1.png' },
+  { id: 'Stranger_Thread_1', image: '/card_images/Stranger_Thread_1.png' },
+  { id: 'Torch_Pin_1', image: '/card_images/Torch_Pin_1.png' },
+  { id: 'Unicorn_Figurine_1', image: '/card_images/Unicorn_Figurine_1.png' },
+  { id: 'Veritable_Camera_1', image: '/card_images/Veritable_Camera_1.png' },
+  { id: 'Whisper_Coin_1', image: '/card_images/Whisper_Coin_1.png' },
 ];
 
 function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards, onClaim }) {
@@ -24,10 +39,14 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   const isSelected = selectedCardIndices.has(index);
   const isFlippedLocal = flippedCards.has(index);
 
+  // Sync flip state
   useEffect(() => { if (isFlippedLocal) setIsFlipped(true); }, [isFlippedLocal]);
 
+  // Entry animation
   const slideIn = useSpring({ transform: isVisible ? 'translateX(0)' : 'translateX(-900px)', config: { tension: 200, friction: 25 } });
+  // Fan expand animation
   const expand = useSpring({ transform: isExpanded && !isSelected ? `translateX(${(index - 1) * 120}px) rotate(${(index - 1) * 15 + (Math.random() * 6 - 3)}deg)` : 'translateX(0) rotate(0deg)', config: { tension: 250, friction: 30 } });
+  // Flip animation
   const flip = useSpring({ transform: `rotateY(${isFlipped ? 180 : 0}deg)`, config: { tension: 300, friction: 30 } });
   const positionSpring = useSpring({ 
     left: isSelected ? (index === 0 ? '25%' : index === 1 ? '50%' : '75%') : '45%', 
@@ -38,6 +57,7 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     opacity: 1 // Force opacity to always be 1
   });
 
+  // Handle route changes
   useEffect(() => {
     if (location.pathname === '/home') {
       setIsVisible(true);
@@ -336,8 +356,9 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
   );
 }
 
-function Deck() {
-  const [cards, setCards] = useState(initialCards);
+export default function Cards() {
+  const [cards, setCards] = useState([]);
+  const [claimedIds, setClaimedIds] = useState(new Set());
   const [selectedCardIndices, setSelectedCardIndices] = useState(new Set());
   const [flippedCards, setFlippedCards] = useState(new Set());
   const [shuffling, setShuffling] = useState(false);
@@ -367,24 +388,54 @@ function Deck() {
     // Don't reset positions, just clear selection to fix visibility bug
     // Cards should stay where they are if they're still flipped
   };
+  const [loading, setLoading] = useState(true);
 
-  // Add card entry to Firestore
+  // Fetch claimed on mount
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) return;
+      const userSnap = await getDoc(doc(db, 'users', user.uid));
+      const data = userSnap.data();
+      const claimed = new Set((data?.cards || []).map(e => e.cardId));
+      setClaimedIds(claimed);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  // Pick three unclaimed
+  const selectThree = () => {
+    const avail = masterCards.filter(c => !claimedIds.has(c.id));
+    const pick = avail.sort(() => 0.5 - Math.random()).slice(0, 3);
+    setCards(pick);
+    setSelectedCardIndices(new Set());
+    setFlippedCards(new Set());
+  };
+
+  useEffect(() => { if (!loading) selectThree(); }, [loading, claimedIds]);
+
+  // Add to deck & refresh
   const handleAddToDeck = async (cardId, description) => {
     try {
       const auth = getAuth();
       const user = auth.currentUser;
-      if (!user) throw new Error('User not authenticated');
+      if (!user) throw new Error('Not signed in');
       const userRef = doc(db, 'users', user.uid);
       const cardRef = doc(db, 'cards', cardId);
       await updateDoc(userRef, {
-        cards: arrayUnion({ cardRef, description }),
+        cards: arrayUnion({ cardId, description }),
         updatedAt: serverTimestamp(),
       });
-      console.log(`Added card ${cardId} with description: ${description}`);
-    } catch (err) {
-      console.error('Error adding to deck:', err);
+      setClaimedIds(prev => new Set(prev).add(cardId));
+    } catch (e) {
+      console.error(e);
     }
   };
+
+  if (loading) return <Center style={{ height: '100vh' }}><Loader /></Center>;
 
   // If we're showing the Figma modal, render it as overlay instead of replacing everything
   return (
@@ -420,5 +471,3 @@ function Deck() {
     </MantineProvider>
   );
 }
-
-export default function Cards() { return <Deck />; }
