@@ -2,18 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useSpring, animated } from 'react-spring'
 import { useLocation } from 'react-router-dom'
 
-// const cards = [
-//   'https://upload.wikimedia.org/wikipedia/commons/f/f5/RWS_Tarot_08_Strength.jpg',
-//   'https://upload.wikimedia.org/wikipedia/commons/9/9b/RWS_Tarot_07_Chariot.jpg',
-//   'https://upload.wikimedia.org/wikipedia/commons/5/53/RWS_Tarot_16_Tower.jpg',
-// ]
 const cards = [
-  '/card_images/Glass_Roar_1.svg',
   '/card_images/Glass_Roar_1.png',
   '/card_images/Glass_Roar_1.png',
-];
+  '/card_images/Glass_Roar_1.png',
+]
 
-function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
+function Card({ index, image, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards }) {
   const location = useLocation()
 
   const [isVisible, setIsVisible] = useState(false)
@@ -21,7 +16,13 @@ function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
   const [isFlipped, setIsFlipped] = useState(false)
 
   const isSelected = selectedCardIndices.has(index)
+  const isFlippedLocal = flippedCards.has(index)
 
+  useEffect(() => {
+    if (isFlippedLocal) {
+      setIsFlipped(true)
+    }
+  }, [isFlippedLocal])
 
   // Entry animation
   const slideIn = useSpring({
@@ -45,28 +46,22 @@ function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
 
   // Animate to different positions based on which card is selected
   const positionSpring = useSpring({
-  /*left: isSelected ? index === 0 ? '20%' : index === 1 ? '50%' : '80%' : '45%',
-  top: isSelected ? '65%' : '25%',
-  transform: `translate(-50%, -50%) scale(${isSelected ? 2 : 1})`,
-  config: { tension: 300, friction: 30 },
-  zIndex: isSelected ? 999 : index === 1 ? 5: 1*/
-  left: isSelected
-    ? index === 0
-      ? '25%'   // left card goes center-left
+    left: isSelected
+      ? index === 0
+        ? '25%'   // left card goes center-left
+        : index === 1
+          ? '50%'   // middle card goes center
+          : '75%'   // right card goes center-right
+      : '45%',     // default deck position
+    top: isSelected ? '50%' : '25%',  // vertically center selected cards
+    transform: `translate(-50%, -50%) scale(${isSelected ? 2 : 1})`,
+    config: { tension: 300, friction: 30 },
+    zIndex: isSelected
+      ? 999
       : index === 1
-      ? '50%'   // middle card goes center
-      : '75%'   // right card goes center-right
-    : '45%',     // default deck position
-  top: isSelected ? '50%' : '25%',  // vertically center selected cards
-  transform: `translate(-50%, -50%) scale(${isSelected ? 2 : 1})`,
-  config: { tension: 300, friction: 30 },
-  zIndex: isSelected
-    ? 999
-    : index === 1
-    ? 5
-    : 1
-})
-
+        ? 5
+        : 1
+  })
 
   useEffect(() => {
     if (location.pathname === '/home') {
@@ -82,16 +77,22 @@ function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
     }
   }, [location.pathname, index])
 
- const handleClick = () => {
-  if (!isExpanded) return
-  setIsFlipped(true)
+  const handleClick = () => {
+    if (!isExpanded) return
+    setIsFlipped(true)
 
-  setSelectedCardIndices(prev => {
-    const updated = new Set(prev)
-    updated.add(index)
-    return updated
-  })
-}
+    setFlippedCards(prev => {
+      const updated = new Set(prev)
+      updated.add(index)
+      return updated
+    })
+
+    setSelectedCardIndices(prev => {
+      const updated = new Set(prev)
+      updated.add(index)
+      return updated
+    })
+  }
 
   return (
     <animated.div style={{
@@ -149,9 +150,8 @@ function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
               backgroundPosition: 'center',
               border: '3px solid #2c3e50',
               boxShadow: 'inset 0 0 20px rgba(0,0,0,0.2)'
-            }} 
-            />
-            
+            }}
+          />
         </animated.div>
       </animated.div>
     </animated.div>
@@ -159,8 +159,23 @@ function Card({ index, image, selectedCardIndices, setSelectedCardIndices }) {
 }
 
 function Deck() {
-
   const [selectedCardIndices, setSelectedCardIndices] = useState(new Set())
+  const [flippedCards, setFlippedCards] = useState(new Set())
+
+  const [shuffling, setShuffling] = useState(false)
+
+  const isAllFlipped = cards.length === flippedCards.size
+
+  const shuffleCards = () => {
+    //   const shuffledCards = [...cards].sort(() => Math.random() - 0.5)
+    //   setShuffling(true)
+    //   setFlippedCards(new Set()) // Reset flipped state
+    //   setSelectedCardIndices(new Set()) // Reset selected state
+    //   setTimeout(() => {
+    //     setShuffling(false)
+    //   }, 500) // Small delay to show shuffle animation
+
+  }
 
   return (
     <div style={{
@@ -180,8 +195,32 @@ function Deck() {
           image={card}
           selectedCardIndices={selectedCardIndices}
           setSelectedCardIndices={setSelectedCardIndices}
+          flippedCards={flippedCards}
+          setFlippedCards={setFlippedCards}
         />
       ))}
+      {isAllFlipped && !shuffling && (
+        <button
+          onClick={shuffleCards}
+          style={{
+            position: 'fixed',         // Make the button fixed at the bottom
+            bottom: '20px',            // 20px from the bottom
+            left: '50%',
+            transform: 'translateX(-50%)', // Center horizontally
+            padding: '15px 30px',
+            // backgroundColor: '#808080',  // Grey background
+            color: 'white',              // White text
+            border: '2px solid lightgrey',
+            borderRadius: '20px',
+            cursor: 'pointer',
+            fontSize: '18px',
+            fontWeight: 'bold',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',  // Shadow for the button
+          }}
+        >
+          Shuffle
+        </button>
+      )}
     </div>
   )
 }
