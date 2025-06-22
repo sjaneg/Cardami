@@ -6,6 +6,7 @@ import { MantineProvider, Button, Loader, Center } from '@mantine/core';
 import { doc, getDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebase'; // initialized Firestore as db
+import LogClaimedCards from '../pages/ClaimedCards';
 
 // Full master list of cards
 const masterCards = [
