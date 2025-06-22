@@ -44,8 +44,13 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
 
   // Entry animation
   const slideIn = useSpring({ transform: isVisible ? 'translateX(0)' : 'translateX(-900px)', config: { tension: 200, friction: 25 } });
-  // Fan expand animation
-  const expand = useSpring({ transform: isExpanded && !isSelected ? `translateX(${(index - 1) * 120}px) rotate(${(index - 1) * 15 + (Math.random() * 6 - 3)}deg)` : 'translateX(0) rotate(0deg)', config: { tension: 250, friction: 30 } });
+  // Fan expand animation (remove random rotation to fix bugs)
+  const expand = useSpring({ 
+    transform: isExpanded && !isSelected 
+      ? `translateX(${(index - 1) * 120}px) rotate(${(index - 1) * 15}deg)` 
+      : 'translateX(0) rotate(0deg)', 
+    config: { tension: 250, friction: 30 } 
+  });
   // Flip animation
   const flip = useSpring({ transform: `rotateY(${isFlipped ? 180 : 0}deg)`, config: { tension: 300, friction: 30 } });
   const positionSpring = useSpring({ 
@@ -61,6 +66,7 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   useEffect(() => {
     if (location.pathname === '/home') {
       setIsVisible(true);
+      setIsFlipped(false); // Always start with Cardami side showing
       const timer = setTimeout(() => setIsExpanded(true), 800 + index * 200);
       return () => clearTimeout(timer);
     } else {
@@ -348,7 +354,7 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
               }
             }}
           >
-            Add to Memories
+            Add to Deck
           </button>
         </div>
       </div>
@@ -369,11 +375,18 @@ export default function Cards() {
   
   const shuffleCards = () => { 
     setShuffling(true); 
+    
+    // Reset all card states immediately
     setFlippedCards(new Set()); 
     setSelectedCardIndices(new Set()); 
     setShowTaskDetail(false);
     setSelectedCard(null);
-    setTimeout(() => setShuffling(false), 500); 
+    
+    // Generate new cards after animation completes
+    setTimeout(() => {
+      selectThree(); // Pick 3 new random unclaimed cards
+      setShuffling(false);
+    }, 800); // Longer delay to let animations settle
   };
 
   // Function called when Claim button is clicked
@@ -411,8 +424,14 @@ export default function Cards() {
     const avail = masterCards.filter(c => !claimedIds.has(c.id));
     const pick = avail.sort(() => 0.5 - Math.random()).slice(0, 3);
     setCards(pick);
+    // Reset all animation states when new cards are selected
     setSelectedCardIndices(new Set());
     setFlippedCards(new Set());
+    
+    // Force all cards to show "Cardami" side initially
+    setTimeout(() => {
+      setFlippedCards(new Set()); // Ensure no cards are flipped initially
+    }, 100);
   };
 
   useEffect(() => { if (!loading) selectThree(); }, [loading, claimedIds]);
@@ -443,7 +462,7 @@ export default function Cards() {
       <div style={{ position: 'relative', width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', overflow: 'hidden' }}>
         {cards.map((card, index) => (
           <Card 
-            key={card.id}
+            key={`${card.id}-${cards.length}`} // Force re-mount when cards change
             index={index} 
             card={card} 
             selectedCardIndices={selectedCardIndices} 
