@@ -276,38 +276,35 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '20px',
-          padding: '60px 40px 40px 40px', // Increased top padding to make room for close button
+          padding: '40px',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.3)',
           position: 'relative'
         }}>
-          {/* Close button - positioned outside the content area */}
+          {/* Close button */}
           <button
             onClick={onBack}
             style={{
               position: 'absolute',
-              top: '16px', // Moved higher up
-              right: '16px', // Moved further right
+              top: '20px',
+              right: '20px',
               background: 'rgba(255, 255, 255, 0.1)',
               border: 'none',
               borderRadius: '50%',
-              width: '44px', // Slightly larger for better touch target
-              height: '44px',
+              width: '40px',
+              height: '40px',
               color: '#ffffff',
-              fontSize: '20px', // Slightly larger icon
+              fontSize: '18px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 0.3s ease',
-              zIndex: 10 // Ensure it's on top
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-              e.target.style.transform = 'scale(1.1)';
             }}
             onMouseLeave={(e) => {
               e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.target.style.transform = 'scale(1)';
             }}
           >
             ×
@@ -485,7 +482,7 @@ export default function Cards() {
   // If we're showing the Figma modal, render it as overlay instead of replacing everything
   return (
     <MantineProvider theme={{ colorScheme: 'dark' }} withGlobalStyles withNormalizeCSS>
-      <div style={{ position: 'relative', width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
         {cards.map((card, index) => (
           <Card 
             key={`${card.id}-${cards.length}`} // Force re-mount when cards change
