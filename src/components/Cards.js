@@ -119,17 +119,15 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     }
   }, [location.pathname, index, shuffling]);
 
-  // Click on card = card flips and becomes large (original functionality)
   const handleClick = () => {
     if (!isExpanded) return;
     setIsFlipped(true);
-    setFlippedCards(prev => new Set(prev).add(index));
-    setSelectedCardIndices(prev => new Set(prev).add(index));
+    setFlippedCards((prev) => new Set(prev).add(index));
+    setSelectedCardIndices((prev) => new Set(prev).add(index));
   };
 
-  // Click on Claim = open Figma modal
   const handleClaim = (e) => {
-    e.stopPropagation(); // Prevents card click from triggering
+    e.stopPropagation();
     onClaim(card, index);
   };
 
@@ -154,46 +152,47 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
         >
           <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, background: 'linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)', border: '3px solid #2c3e50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontFamily: 'audiowide', fontWeight: 'bold', color: '#2c3e50' }}>Cardami</div>
           <animated.div
-            style={{ 
-              position: 'absolute', 
-              width: '100%', 
-              height: '100%', 
-              backfaceVisibility: 'hidden', 
-              transform: 'rotateY(180deg)', 
-              borderRadius: 12, 
-              backgroundImage: `url(${card.image})`, 
-              backgroundSize: 'cover', 
-              backgroundPosition: 'center', 
-              filter: isHovered ? 'grayscale(80%)' : 'none' 
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              borderRadius: 8,
+              backgroundImage: `url(${card.image})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              filter: isHovered ? 'grayscale(80%)' : 'none',
             }}
           >
-            {/* Overlay when card is selected */}
             {isSelected && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                paddingBottom: '20px'
-              }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  paddingBottom: '20px',
+                }}
+              >
                 <Button
-                  style={{ 
-                    padding: '6px 16px', 
-                    fontSize: 12, 
-                    background: 'rgba(255, 255, 255, 0.2)', 
+                  style={{
+                    padding: '6px 16px',
+                    fontSize: 12,
+                    background: 'rgba(255, 255, 255, 0.2)',
                     color: '#ffffff',
                     border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '6px', 
-                    fontWeight: '500', 
+                    borderRadius: '6px',
+                    fontWeight: '500',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    backdropFilter: 'blur(8px)'
+                    backdropFilter: 'blur(8px)',
                   }}
                   size="xs"
                   onClick={handleClaim}
@@ -208,6 +207,7 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
     </animated.div>
   );
 }
+
 
 function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
   const [taskDescription, setTaskDescription] = useState('');
@@ -240,11 +240,10 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
         <div style={{
           width: '300px',
           height: '450px',
-          borderRadius: '16px',
+          borderRadius: '8px',
           backgroundImage: `url(${selectedCard.image})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          border: '3px solid #2c3e50',
           boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
         }} />
       </div>
