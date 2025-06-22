@@ -404,7 +404,7 @@ const [showSparkle, setShowSparkle] = useState(true);
               }
             }}
           >
-            Add to Deck
+            Add to Memories
           </button>
         </div>
       </div>
