@@ -92,7 +92,7 @@ export default function Memories() {
   return (
     <div className="memories-container">
       {claimed.length === 0 ? (
-        <p className="no-memories">You haven’t claimed any cards yet!</p>
+        <p className="no-memories">Go make some memories!!!</p>
       ) : (
         <div className="card-grid">
           {claimed.map(({ cardId, description }) => {

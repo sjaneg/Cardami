@@ -348,7 +348,7 @@ function TaskDetailView({ selectedCard, onBack, onAddToDeck }) {
               }
             }}
           >
-            Add to Deck
+            Add to Memories
           </button>
         </div>
       </div>
