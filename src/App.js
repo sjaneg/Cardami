@@ -11,7 +11,7 @@ import { PrivateRoute } from './routeGuards/PrivateRoute.js';
 import { PublicRoute } from './routeGuards/PublicRoute.js';
 import { useAuth } from './contexts/AuthProvider.js';
 import Landing from './pages/Landing.js';
-import Cards from './components/Cards.js'
+import Cards from './pages/Cards.js'
 
 function App() {
 
