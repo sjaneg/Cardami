@@ -29,6 +29,9 @@ export default function NavBar() {
             <Link to="/memories" className={`hover:text-gray-400 font-audiowide px-4 py-2 text-xl ${currentPath === "/memories" ? "underline underline-offset-4" : ""}`}>
               My Memories
             </Link>
+            <Link to="/imageupload" className={`hover:text-gray-400 font-audiowide px-4 py-2 text-xl ${currentPath === "/memories" ? "underline underline-offset-4" : ""}`}>
+              My Memories
+            </Link>
             <span
               onClick={handleLogout}
               className={'ml-auto cursor-pointer hover:text-gray-400 font-audiowide px-4 py-2 text-xl'}
