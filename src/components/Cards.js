@@ -9,24 +9,24 @@ import { db } from '../firebase'; // initialized Firestore as db
 
 // Full master list of cards
 const masterCards = [
-  { id: 'Bottle_of_Joy_1', image: '/card_images/Bottle_of_Joy_1.png', num: 8 },
-  { id: 'Brave_Battle_Horn_1', image: '/card_images/Brave_Battle_Horn_1.png', num: 3 },
-  { id: 'Dewbloom_1', image: '/card_images/Dewbloom_1.png', num: 20 },
-  { id: 'Echo_Drum_1', image: '/card_images/Echo_Drum_1.png', num: 6 },
-  { id: 'Everlasting_Seedpouch_1', image: '/card_images/Everlasting_Seedpouch_1.png', num: 18 },
-  { id: 'Feather_of_First_Flight_1', image: '/card_images/Feather_of_First_Flight_1.png', num: 2 },
-  { id: 'Glass_Roar_1', image: '/card_images/Glass_Roar_1.png', num: 1 },
-  { id: 'Heritage_Patch_1', image: '/card_images/Heritage_Patch_1.png', num: 16 },
-  { id: 'Kindkey_1', image: '/card_images/Kindkey_1.png', num: 7 },
-  { id: 'Merchant_Crest_1', image: '/card_images/Merchant_Crest_1.png', num: 13 },
-  { id: 'Mirrorleaf_Locket_1', image: '/card_images/Mirrorleaf_Locket_1.png', num : 10 },
-  { id: 'Resonant_Bell_1', image: '/card_images/Resonant_Bell_1.png', num: 19 },
-  { id: 'Smoothstone_1', image: '/card_images/Smoothstone_1.png', num: 17 },
-  { id: 'Stranger_Thread_1', image: '/card_images/Stranger_Thread_1.png', num: 15 },
-  { id: 'Torch_Pin_1', image: '/card_images/Torch_Pin_1.png', num: 4 },
-  { id: 'Unicorn_Figurine_1', image: '/card_images/Unicorn_Figurine_1.png', num: 9 },
-  { id: 'Veritable_Camera_1', image: '/card_images/Veritable_Camera_1.png', num: 12 },
-  { id: 'Whisper_Coin_1', image: '/card_images/Whisper_Coin_1.png', num: 1},
+  { id: 'Bottle_of_Joy_1', image: '/card_images/Bottle_of_Joy_1.png' },
+  { id: 'Brave_Battle_Horn_1', image: '/card_images/Brave_Battle_Horn_1.png' },
+  { id: 'Dewbloom_1', image: '/card_images/Dewbloom_1.png' },
+  { id: 'Echo_Drum_1', image: '/card_images/Echo_Drum_1.png' },
+  { id: 'Everlasting_Seedpouch_1', image: '/card_images/Everlasting_Seedpouch_1.png' },
+  { id: 'Feather_of_First_Flight_1', image: '/card_images/Feather_of_First_Flight_1.png' },
+  { id: 'Glass_Roar_1', image: '/card_images/Glass_Roar_1.png' },
+  { id: 'Heritage_Patch_1', image: '/card_images/Heritage_Patch_1.png' },
+  { id: 'Kindkey_1', image: '/card_images/Kindkey_1.png' },
+  { id: 'Merchant_Crest_1', image: '/card_images/Merchant_Crest_1.png' },
+  { id: 'Mirrorleaf_Locket_1', image: '/card_images/Mirrorleaf_Locket_1.png' },
+  { id: 'Resonant_Bell_1', image: '/card_images/Resonant_Bell_1.png' },
+  { id: 'Smoothstone_1', image: '/card_images/Smoothstone_1.png' },
+  { id: 'Stranger_Thread_1', image: '/card_images/Stranger_Thread_1.png' },
+  { id: 'Torch_Pin_1', image: '/card_images/Torch_Pin_1.png' },
+  { id: 'Unicorn_Figurine_1', image: '/card_images/Unicorn_Figurine_1.png' },
+  { id: 'Veritable_Camera_1', image: '/card_images/Veritable_Camera_1.png' },
+  { id: 'Whisper_Coin_1', image: '/card_images/Whisper_Coin_1.png' },
 ];
 
 function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippedCards, setFlippedCards, onClaim }) {
@@ -42,30 +42,50 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   // Sync flip state
   useEffect(() => { if (isFlippedLocal) setIsFlipped(true); }, [isFlippedLocal]);
 
-  // Simple fade in animation
-  const fadeIn = useSpring({ 
+  // Smooth card entrance - like solitaire games
+  const cardEntrance = useSpring({ 
     opacity: isVisible ? 1 : 0,
-    transform: isVisible ? 'translateY(0px)' : 'translateY(50px)',
-    config: { tension: 200, friction: 25 }
+    transform: isVisible ? 'translateY(0px)' : 'translateY(30px)',
+    config: { tension: 120, friction: 14 } // Very smooth, slow ease
+  });
+  
+  // Fan expansion with solitaire-like smoothness
+  const fanExpansion = useSpring({ 
+    transform: isExpanded && !isSelected 
+      ? `translateX(${(index - 1) * 110}px) rotate(${(index - 1) * 10}deg)` 
+      : 'translateX(0px) rotate(0deg)',
+    config: { 
+      tension: 80,   // Gentle tension
+      friction: 26,  // High friction for smooth deceleration
+      mass: 1.2,     // Slight weight feeling
+      clamp: false   // Allow natural overshoot and settle
+    }
   });
 
   // Flip animation
   const flip = useSpring({ transform: `rotateY(${isFlipped ? 180 : 0}deg)`, config: { tension: 300, friction: 30 } });
   const positionSpring = useSpring({ 
-    left: isSelected ? (index === 0 ? '25%' : index === 1 ? '50%' : '75%') : `${30 + (index * 20)}%`, // Horizontal row positions
-    top: isSelected ? '50%' : '50%', // All cards at center height
-    transform: `translate(-50%, -50%) scale(${isSelected ? 2 : 1})`, 
-    config: { tension: 300, friction: 30 }, 
-    zIndex: isSelected ? 999 : 1, // Remove middle card z-index priority
+    left: isSelected ? (index === 0 ? '25%' : index === 1 ? '50%' : '75%') : '50%', // Start from center
+    top: isSelected ? '50%' : '40%', // Moved up from 50% to 40%
+    transform: `translate(-50%, -50%) scale(${isSelected ? 1.6 : 1})`, // Smaller scale when selected
+    config: { tension: 170, friction: 26 }, // Smooth position changes
+    zIndex: isSelected ? 999 : index === 1 ? 10 : index + 1, // Middle card always on top
     opacity: 1
   });
 
-  // Handle route changes - simple fade in with minimal delay
+  // Handle route changes - staggered smooth entrance like solitaire
   useEffect(() => {
     if (location.pathname === '/home') {
       setIsVisible(true);
       setIsFlipped(false);
-      setIsExpanded(true); // Cards are immediately interactive
+      
+      // Gentle staggered expansion like dealing cards
+      const expandDelay = index * 120; // 120ms between each card
+      const timer = setTimeout(() => {
+        setIsExpanded(true);
+      }, expandDelay + 200); // Small base delay
+      
+      return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
       setIsExpanded(false);
@@ -88,13 +108,14 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
   };
 
   return (
-    <animated.div style={{ position: 'absolute', ...fadeIn, ...positionSpring }}>
-      <animated.div
-        onClick={handleClick}
-        style={{ width: 140, height: 210, borderRadius: 12, position: 'relative', transformStyle: 'preserve-3d', cursor: isExpanded ? 'pointer' : 'default', boxShadow: '0 15px 35px rgba(0,0,0,0.4)', ...flip }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+    <animated.div style={{ position: 'absolute', ...cardEntrance, ...positionSpring }}>
+      <animated.div style={fanExpansion}>
+        <animated.div
+          onClick={handleClick}
+          style={{ width: 200, height: 300, borderRadius: 12, position: 'relative', transformStyle: 'preserve-3d', cursor: isExpanded ? 'pointer' : 'default', boxShadow: '0 15px 35px rgba(0,0,0,0.4)', ...flip }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
           <div style={{ position: 'absolute', width: '100%', height: '100%', backfaceVisibility: 'hidden', borderRadius: 12, background: 'linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)', border: '3px solid #2c3e50', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontFamily: 'audiowide', fontWeight: 'bold', color: '#2c3e50' }}>Cardami</div>
           <animated.div
             style={{ 
@@ -148,6 +169,7 @@ function Card({ index, card, selectedCardIndices, setSelectedCardIndices, flippe
             )}
           </animated.div>
         </animated.div>
+      </animated.div>
     </animated.div>
   );
 }
